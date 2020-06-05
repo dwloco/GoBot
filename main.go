@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/tucnak/telebot.v2"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -11,14 +11,7 @@ import (
 )
 
 var inlinebtn1 = tb.InlineButton{
-	Unique:          "Cacti",
 	Text:            "🌵",
-	InlineQuery: "Cacti",
-}
-
-var inlinebtn2 = tb.InlineButton{
-	Unique:          "Turtle",
-	Text:            "🐢",
 }
 
 var inlineKeys = [][]tb.InlineButton{
@@ -57,23 +50,11 @@ func SetHandlers() {
 			&tb.ReplyMarkup{InlineKeyboard: inlineKeys},
 		)
 	})
-	bot.Handle(&inlinebtn1, func(c *tb.Callback) {
+	/*bot.Handle(&inlinebtn1, func(c *tb.Callback) {
 		bot.Respond(c, &tb.CallbackResponse{
 			ShowAlert: false,
 		})
-		var result tb.ArticleResult
-		result.SetContent(&tb.InputTextMessageContent{
-			Text: "Some text",
-		})
-		bot.Send(c.Sender, result)
 		//bot.Send(c.Message.Chat, "Puto el que lee 1")
-	})
-	/*bot.Handle(&inlinebtn2, func(c *tb.Callback) {
-		bot.Respond(c, &tb.CallbackResponse{
-			ShowAlert: false,
-			Text: "xd",
-		})
-		//bot.Send(c.Message.Chat, "Puto el que lee 2")
 	})*/
 }
 
