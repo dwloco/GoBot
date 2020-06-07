@@ -1,23 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"io/ioutil"
-	"os"
-	"strconv"
 	"time"
 )
-
-var inlinebtn1 = tb.InlineButton{
-	Text:            "🌵",
-}
-
-var inlineKeys = [][]tb.InlineButton{
-	{inlinebtn1},
-}
-
 
 var bot *tb.Bot
 
@@ -25,7 +12,7 @@ func main() {
 	token := GetToken()
 	if token != nil {
 		b, err := tb.NewBot(tb.Settings{
-			Token: token.(string),
+			Token:  token.(string),
 			Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 		})
 		if err != nil {
@@ -40,57 +27,7 @@ func main() {
 
 func SetHandlers() {
 	bot.Handle(tb.OnQuery, ShowInlinePics)
-	bot.Handle("/hola", func(m *tb.Message) {
-		bot.Send(m.Chat, "Holis")
-	})
-	bot.Handle("/sendsticker", func(m *tb.Message) {
-		bot.Send(
-			m.Chat,
-			"Elegi una opcion",
-			&tb.ReplyMarkup{InlineKeyboard: inlineKeys},
-		)
-	})
-	/*bot.Handle(&inlinebtn1, func(c *tb.Callback) {
-		bot.Respond(c, &tb.CallbackResponse{
-			ShowAlert: false,
-		})
-		//bot.Send(c.Message.Chat, "Puto el que lee 1")
-	})*/
-}
-
-func GetToken() interface{} {
-	file, err := os.Open("token.json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	val, _ := ioutil.ReadAll(file)
-	var result map[string]interface{}
-	json.Unmarshal(val, &result)
-	return result["token"]
-}
-
-
-func ShowInlinePics(q *tb.Query) {
-	urls := []string {
-		"https://he8ca29qncg2u39172b39hup-wpengine.netdna-ssl.com/wp-content/uploads/2020/04/rick-astley-never-gonna-give-you-up-meme-696x369.gif",
-		"https://vignette.wikia.nocookie.net/destripando-la-historia/images/4/4d/Zeus-ducha.jpg/revision/latest/scale-to-width-down/200?cb=20200104221621&path-prefix=es",
-	}
-	results := make(tb.Results, len(urls))
-	for i, url := range urls {
-		result := &tb.PhotoResult{
-			URL: url,
-			ThumbURL: url,
-		}
-		results[i] = result
-		results[i].SetResultID(strconv.Itoa(i))
-	}
-	err := bot.Answer(q, &tb.QueryResponse{
-		Results: results,
-		CacheTime: 60,
-	})
-	if err != nil {
-		println(err)
-	}
+	bot.Handle("/hola", SayHi)
+	bot.Handle("/sendsticker", SendSticker)
+	bot.Handle(tb.OnPhoto, GetPicInfo)
 }
