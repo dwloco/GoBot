@@ -1,11 +1,9 @@
 package main
 
 import (
+	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"io"
-	"net/http"
 	"strconv"
-	"strings"
 )
 
 var inlinebtn1 = tb.InlineButton{
@@ -18,13 +16,23 @@ var inlineKeys = [][]tb.InlineButton{
 
 var urls = []string{
 	"https://he8ca29qncg2u39172b39hup-wpengine.netdna-ssl.com/wp-content/uploads/2020/04/rick-astley-never-gonna-give-you-up-meme-696x369.gif",
-	//"https://vignette.wikia.nocookie.net/destripando-la-historia/images/4/4d/Zeus-ducha.jpg/revision/latest/scale-to-width-down/200?cb=20200104221621&path-prefix=es",
+	"https://vignette.wikia.nocookie.net/destripando-la-historia/images/4/4d/Zeus-ducha.jpg/revision/latest/scale-to-width-down/200?cb=20200104221621&path-prefix=es",
 }
+
+const (
+	RickRoll = "0"
+	Zeus     = "1"
+)
+
+var messageQueue []string
+
+var group *tb.Chat
 
 func ShowInlinePics(q *tb.Query) {
 	results := make(tb.Results, len(urls))
 	for i, url := range urls {
 		result := &tb.PhotoResult{
+			//Description: strconv.Itoa(i),
 			URL:      url,
 			ThumbURL: url,
 		}
@@ -42,6 +50,7 @@ func ShowInlinePics(q *tb.Query) {
 
 func SayHi(m *tb.Message) {
 	bot.Send(m.Chat, "Holis")
+	group = m.Chat
 }
 
 func SendSticker(m *tb.Message) {
@@ -52,42 +61,32 @@ func SendSticker(m *tb.Message) {
 	)
 }
 
-func GetPicInfo(m *tb.Message) {
-	var client = http.Client{}
-
-	pic := tb.File{FileID: m.Photo.FileID}
-	file, _ := bot.GetFile(&pic)
-	buf1 := new(strings.Builder)
-	io.Copy(buf1, file)
-	//filebytes, _ := ioutil.ReadAll(file)
-
-	for i := 0; i < len(urls); i++ {
-		resp, _ := client.Get(urls[0])
-		//body, _ := ioutil.ReadAll(resp.Body)
-		buf2 := new(strings.Builder)
-		io.Copy(buf2, resp.Body)
-
-		/*if ComparePics(body, filebytes) {
-			println("Foto %d OK", i)
-		} else {
-			println("Foto %d NOT OK", i)
-		}*/
-		resp.Body.Close()
+func GetPicInfo(c *tb.ChosenInlineResult) {
+	if group != nil {
+		AnswerPic(c.ResultID)
+	} else {
+		messageQueue = append(messageQueue, c.ResultID)
 	}
 }
 
-/*
-func ComparePics(p1, p2 []byte) bool {
-	var result = true
-	if len(p1) != len(p2) {
-		println("%d - %d", len(p1), len(p2))
-		return false
+func AnswerPic(id string) {
+	switch id {
+	case RickRoll:
+		bot.Send(group, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+	case Zeus:
+		bot.Send(group, "ZEUS")
+	default:
+		fmt.Println("Codigo no definido (" + id + ")")
 	}
-	for i, val := range p1 {
-		if val != p2[i] {
-			result = false
-			break
+}
+
+func UpdateGlobalGroupID(m *tb.Message) {
+	//println(m.Chat.ID)
+	group = m.Chat
+	if messageQueue != nil {
+		for _, val := range messageQueue {
+			AnswerPic(val)
 		}
+		messageQueue = nil
 	}
-	return result
-}*/
+}

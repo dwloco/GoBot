@@ -27,7 +27,8 @@ func main() {
 
 func SetHandlers() {
 	bot.Handle(tb.OnQuery, ShowInlinePics)
+	bot.Handle(tb.OnText, UpdateGlobalGroupID)
 	bot.Handle("/hola", SayHi)
 	bot.Handle("/sendsticker", SendSticker)
-	bot.Handle(tb.OnPhoto, GetPicInfo)
+	bot.Handle(tb.OnChosenInlineResult, GetPicInfo)
 }
